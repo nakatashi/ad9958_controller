@@ -1,0 +1,104 @@
+
+ad9958_core.v,1141
+module ad9958_core(ad9958_core9,105
+				   input 		  clock,clock10,125
+				   input 		  reset_n,reset_n11,149
+				   input [32-1:0] ftw_ch0,ftw_ch013,223
+				   input [32-1:0] ftw_ch1,ftw_ch114,254
+				   input [32-1:0] asf_ch0,asf_ch015,285
+				   input [32-1:0] asf_ch1,asf_ch116,316
+				   input 		  vco_gain,vco_gain19,410
+				   input [4:0] 	  clock_multiplier,clock_multiplier20,437
+				   input [1:0] 	  dac_fscale_ch0,dac_fscale_ch021,477
+				   input [1:0] 	  dac_fscale_ch1,dac_fscale_ch122,515
+				   input busy,busy24,554
+				   output 		  trigger,trigger26,581
+				   output [4:0]   packs_to_send,packs_to_send27,608
+				   output [63:0]  data_input,data_input28,645
+				   output 		  master_reset,master_reset30,687
+				   output 		  io_updateio_update31,719
+	 STATE_INIT = 0,STATE_INIT41,918
+	 STATE_SEND = 1;STATE_SEND42,936
+	 IO_MODE = `IOMODE_4_BIT;IO_MODE46,978
+   reg [32-1:0] 				  ftw_ch0_buf;ftw_ch0_buf48,1009
+   reg [32-1:0] 				  ftw_ch1_buf;ftw_ch1_buf49,1044
+   reg [32-1:0] 				  asf_ch0_buf;asf_ch0_buf50,1079
+   reg [32-1:0] 				  asf_ch1_buf;asf_ch1_buf51,1114
+
+spi_send_only_tb.v,362
+module spi_send_only_tb;spi_send_only_tb3,22
+   wire busy;busy4,47
+   wire cs;cs5,61
+   wire sclk;sclk6,73
+   wire [3:0] sdio;sdio7,87
+   reg 		 clock;clock9,108
+   reg 		 reset_n;reset_n10,125
+   reg 		 trigger;trigger11,144
+   reg [4:0] packs_to_send;packs_to_send12,163
+   reg [63:0] data_input;data_input13,191
+   integer 	   i;i31,620
+
+spi_send_only.v,631
+module spi_send_only(spi_send_only18,482
+					 input 			  clock,clock19,504
+					 input 			  reset_n,reset_n20,528
+					 input 			  trigger,trigger21,554
+					 output reg 	  busy,busy22,580
+					 input [4:0] 	  packs_to_send,packs_to_send23,606
+					 input [63:0] 	  data_input,data_input25,652
+					 output reg 	  cs,cs27,709
+					 output reg 	  sclk,sclk28,733
+					 output reg [3:0] sdiosdio29,759
+	 STATE_IDLE = 0,STATE_IDLE33,836
+	 STATE_SEND = 1;STATE_SEND34,854
+   reg 								  state;state36,873
+   reg [4:0] 						  packs_cntr;packs_cntr37,897
+   reg [63:0] 						  data_send;data_send40,949
+
+ad9958_master.v,1253
+module ad9958_master(ad9958_master3,22
+					 input 			  clock,clock4,44
+					 input 			  reset_n,reset_n5,68
+					 output 		  cs,cs7,95
+					 output 		  sclk,sclk8,116
+					 output [3:0] 	  sdio,sdio9,139
+					 output 		  master_reset,master_reset11,168
+					 output 		  io_update,io_update12,199
+					 input [32-1:0] ftw_ch0,ftw_ch015,229
+					 input [32-1:0] ftw_ch1,ftw_ch116,259
+					 input [32-1:0] asf_ch0,asf_ch017,289
+					 input [32-1:0] asf_ch1asf_ch118,319
+   wire					busy;					// From spi_master of spi_send_only.vbusy22,447
+   wire [4:0]			clock_multiplier;		// From config_register of ad9958_config_register.vclock_multiplier23,507
+   wire [1:0]			dac_fscale_ch0;			// From config_register of ad9958_config_register.vdac_fscale_ch024,594
+   wire [1:0]			dac_fscale_ch1;			// From config_register of ad9958_config_register.vdac_fscale_ch125,680
+   wire [63:0]			data_input;				// From ad9958_core_inst of ad9958_core.vdata_input26,766
+   wire [4:0]			packs_to_send;			// From ad9958_core_inst of ad9958_core.vpacks_to_send27,840
+   wire					trigger;				// From ad9958_core_inst of ad9958_core.vtrigger28,915
+   wire					vco_gain;				// From config_register of ad9958_config_register.vvco_gain29,981
+
+operation.md,151
+# OperationOperation1,0
+## Sending command via SPISending command via SPI2,12
+## InitializationInitialization8,302
+## Main LoopMain Loop18,680
+
+ad9958_config_register.v,306
+module ad9958_config_register(ad9958_config_register11,232
+							  output reg 	   vco_gain,vco_gain12,263
+							  output reg [4:0] clock_multiplier,clock_multiplier13,297
+							  output reg [1:0] dac_fscale_ch0,dac_fscale_ch014,341
+							  output reg [1:0] dac_fscale_ch1dac_fscale_ch115,383
+
+four_bit_spi.v,429
+module four_bit_spi(four_bit_spi2,21
+   input reset_n,reset_n3,42
+    input clock,clock4,60
+    input send_en,send_en5,77
+    input [3:0] send_data,send_data7,97
+    input [3:0] packs_to_send, //1 pack = 4 bitpacks_to_send8,124
+    output reg cs,cs10,173
+    output reg sclk,sclk11,192
+    output reg [3:0] sdio,sdio12,213
+    output reg req_completereq_complete13,240
+reg [3:0] packs_sent;packs_sent23,350
