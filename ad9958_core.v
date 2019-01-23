@@ -66,6 +66,11 @@ module ad9958_core(
 	 CH0_SELECTED = 1,
 	 CH1_SELECTED = 2,
 	 BOTH_SELECTED = 3;
+
+   parameter
+	 TUNE_FREQ = 0,
+	 TUNE_AMPL = 1;
+   
    reg 								 init_done;
    reg [1:0] 						 channel_select;   
 
@@ -73,6 +78,8 @@ module ad9958_core(
    reg [3:0] 						 next_state;
    
    reg [7:0] 						 reg_address;
+
+   reg [1:0] 						 tune_target;
    
    reg [32-1:0] 					 ftw_ch0_buf;
    reg [32-1:0] 					 ftw_ch1_buf;
@@ -92,6 +99,7 @@ module ad9958_core(
 	  if(~reset_n) begin
 		 init_done <= 0;
 		 state <= STATE_MASTER_RESET;
+		 
 	  end else begin
 		 case(state)
 		   STATE_MASTER_RESET : begin
@@ -100,6 +108,8 @@ module ad9958_core(
 			  next_state <= STATE_CSR_CONFIG;
 			  channel_select <= NONE_SELECTED;
 			  reg_address <= `ADDR_CSR;
+			  tune_target <= TUNE_FREQ;
+
 		   end
 
 		   STATE_IO_UPDATE : begin
@@ -160,12 +170,26 @@ module ad9958_core(
 			  case (channel_select)
 				CH0_SELECTED : begin
 				   data_input <= CH0_ENABLE | MSB_FIRST | IO_MODE;
-				   reg_address <= `ADDR_CFTW0;
+				   case(tune_target)
+					 TUNE_FREQ : begin
+						reg_address <= `ADDR_CFTW0;
+					 end
+					 TUNE_AMPL :begin
+						reg_address <= `ADDR_ACR;
+					 end
+				   endcase
 				end
 
 				CH1_SELECTED : begin
 				   data_input <= CH1_ENABLE | MSB_FIRST | IO_MODE;
-				   reg_address <= `ADDR_CFTW0;
+				   case(tune_target)
+					 TUNE_FREQ : begin
+						reg_address <= `ADDR_CFTW0;
+					 end
+					 TUNE_AMPL :begin
+						reg_address <= `ADDR_ACR;
+					 end
+				   endcase
 				end
 				
 				default : begin /*NONE_SELECTED*/
@@ -215,16 +239,25 @@ module ad9958_core(
 			  
 			  case(channel_select)
 				CH0_SELECTED : begin
+				   channel_select <= CH1_SELECTED;
 				   data_input <= ftw_ch0_buf;
+				   next_state <= STATE_INSTRUCTION_WRITE;
+				   tune_target <= TUNE_FREQ;
+
 				end
 				CH1_SELECTED : begin
+				   channel_select <= CH0_SELECTED;
 				   data_input <= ftw_ch1_buf;
+				   next_state <= STATE_IO_UPDATE;
+				   tune_target <= TUNE_AMPL;
+
 				end
 				default : begin
 				   // THIS IS EXCEPTION, DO NOTHING
 				end
 			  endcase // case (channel_select)
-			  reg_address <= `ADDR_ACR;
+//			  reg_address <= `ADDR_ACR;
+			  reg_address <= `ADDR_CSR;
 			  // case (channel_select)
 		   end // case: STATE_FTW_CONFIG
 
@@ -240,6 +273,8 @@ module ad9958_core(
 				   // only channel0 is configured, configure channel1 without issuing io_update.
 				   next_state <= STATE_INSTRUCTION_WRITE;
 				   data_input <= asf_ch0_buf;
+				   tune_target <= TUNE_AMPL;
+
 				end
 
 				CH1_SELECTED : begin
@@ -247,6 +282,7 @@ module ad9958_core(
 				   // both channels are configured, issue io_update to reflect changes.
 				   next_state <= STATE_IO_UPDATE;
 				   data_input <= asf_ch1_buf;
+				   tune_target <= TUNE_FREQ;
 				end
 				default : begin
 				   channel_select <= CH0_SELECTED;
