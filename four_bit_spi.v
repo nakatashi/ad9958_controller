@@ -9,7 +9,7 @@ module four_bit_spi(
 					 input [63:0] 	  data_input,
 					 // SPI interface
 					 output reg 	  cs,
-					 output reg 	  sclk,
+					 output  	  sclk,
 					 output reg [3:0] sdio
 );
 
@@ -28,7 +28,7 @@ module four_bit_spi(
 	  cs = 0;
    end
 
-   always @(posedge clock or negedge clock) begin
+/*   always @(posedge clock or negedge clock) begin
 	  if(~reset_n) begin
 		 sclk <= 1'b1;
 	  end else begin
@@ -43,32 +43,57 @@ module four_bit_spi(
 		   end
 		 endcase // case (state)
 	  end
-   end // always @ (posedge clock or negedge clock)
+   end // always @ (posedge clock or negedge clock)*/
+
+   reg pos;
+   reg neg;
+
+   wire sclk = !(neg^pos);
+   // Phase of sclk is constant because reset_n is evaluated at the edge of clock.
+   always @(posedge clock)begin
+	  if(~reset_n) pos <= 0;
+	  else begin
+		 if(state == STATE_SEND) pos <= ~pos;
+
+	  end
+   end
+
+   always @(negedge clock)begin
+	  if(~reset_n) begin
+		 neg <= 0;
+	  end
+	  else begin
+		 if(state == STATE_SEND) neg <= ~neg;
+	  end
+   end
 
    // handle statemachine transition
    always @(posedge clock) begin
 	  if(~reset_n) begin
 		 state <= STATE_IDLE;
 		 triggered <= 0;
+		 busy <= 0;
 	  end
 	  case(state)
 		STATE_IDLE : begin
 		   if(trigger & ~busy) begin
+			  busy <=1 ;
 			  triggered <= 1;
 			  state <= STATE_SEND;
 		   end else begin
+			  busy <= 0;
 			  triggered <= 0;
 		   end
 		end
 		STATE_SEND : begin
+		   busy <= 1;
 		   triggered <= 0;
 		   if(packs_cntr == 0) begin
 			  state <= STATE_IDLE;
 		   end
 		end
 	  endcase
-   end
-
+   end // always @ (posedge clock)
 
    always @(negedge sclk) begin
 	  if(~reset_n) begin
@@ -100,8 +125,4 @@ module four_bit_spi(
 	  end
 	  
    end // always @ (negedge sclk)
-
-   always @(posedge sclk) begin
-	  
-   end
 endmodule
