@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module spi_send_only_tb;
+module four_bit_spi_tb;
    wire busy;
    wire cs;
    wire sclk;
@@ -12,7 +12,7 @@ module spi_send_only_tb;
    reg [4:0] packs_to_send;
    reg [63:0] data_input;
    
-   spi_send_only dut(/*AUTOINST*/
+   four_bit_spi dut(/*AUTOINST*/
 					 // Outputs
 					 .busy				(busy),
 					 .cs				(cs),
@@ -32,8 +32,8 @@ module spi_send_only_tb;
 
 
    initial begin
-	  $dumpfile("spi_send_only_tb.vcd");
-	  $dumpvars(0, spi_send_only_tb);
+	  $dumpfile("four_bit_spi_tb.vcd");
+	  $dumpvars(0, four_bit_spi_tb);
 	  data_input = 0;
 	  for(i = 0;i < 10; i = i+1)begin
 	//	 data_input[i*4+3:i*4] <= i;
@@ -50,11 +50,11 @@ module spi_send_only_tb;
 
 	  #10 trigger <= 1;
 
-	  #10 trigger <= 0;
-	  
+	  #20 trigger <= 0;
+
 	  # 1000 trigger <= 1;
 	  packs_to_send <= 10;
-	  # 10 trigger <= 0;
+	  # 20 trigger <= 0;
 	  
 	  #10000
 		$display("END");

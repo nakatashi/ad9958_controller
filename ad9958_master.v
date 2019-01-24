@@ -50,7 +50,7 @@ module ad9958_master(
 								.busy			(busy));
    
 
-   spi_send_only spi_master(/*AUTOINST*/
+   four_bit_spi spi_master(/*AUTOINST*/
 							// Outputs
 							.busy				(busy),
 							.cs					(cs),
