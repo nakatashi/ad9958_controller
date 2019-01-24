@@ -12,8 +12,8 @@ module ad9958_core(
 				   // input from ftw, asf buffer registers.
 				   input [32-1:0] 	 ftw_ch0,
 				   input [32-1:0] 	 ftw_ch1,
-				   input [32-1:0] 	 asf_ch0,
-				   input [32-1:0] 	 asf_ch1,
+				   input [10-1:0] 	 asf_ch0,
+				   input [10-1:0] 	 asf_ch1,
 
 				   // input from initizalization configuration registers.
 				   input 			 vco_gain,
@@ -36,6 +36,9 @@ module ad9958_core(
    parameter
 	 MSB_FIRST = 0,
 	 LSB_FIRST = 1;
+
+   parameter
+	 ASF_EN = 13'b1000000000000;
 
    parameter
 	 CH0_ENABLE = 8'b01000000,
@@ -274,7 +277,7 @@ module ad9958_core(
 				   channel_select <= CH1_SELECTED;
 				   // only channel0 is configured, configure channel1 without issuing io_update.
 				   next_state <= STATE_INSTRUCTION_WRITE;
-				   data_input <= asf_ch0_buf;
+				   data_input <= ASF_EN | asf_ch0_buf;
 				   tune_target <= TUNE_AMPL;
 
 				end
@@ -283,7 +286,7 @@ module ad9958_core(
 				   channel_select <= CH0_SELECTED;
 				   // both channels are configured, issue io_update to reflect changes.
 				   next_state <= STATE_IO_UPDATE;
-				   data_input <= asf_ch1_buf;
+				   data_input <= ASF_EN | asf_ch1_buf;
 				   tune_target <= TUNE_FREQ;
 				end
 				default : begin
