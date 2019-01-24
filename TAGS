@@ -1,29 +1,67 @@
 
-ad9958_core.v,1141
-module ad9958_core(ad9958_core9,105
-				   input 		  clock,clock10,125
-				   input 		  reset_n,reset_n11,149
-				   input [32-1:0] ftw_ch0,ftw_ch013,223
-				   input [32-1:0] ftw_ch1,ftw_ch114,254
-				   input [32-1:0] asf_ch0,asf_ch015,285
-				   input [32-1:0] asf_ch1,asf_ch116,316
-				   input 		  vco_gain,vco_gain19,410
-				   input [4:0] 	  clock_multiplier,clock_multiplier20,437
-				   input [1:0] 	  dac_fscale_ch0,dac_fscale_ch021,477
-				   input [1:0] 	  dac_fscale_ch1,dac_fscale_ch122,515
-				   input busy,busy24,554
-				   output 		  trigger,trigger26,581
-				   output [4:0]   packs_to_send,packs_to_send27,608
-				   output [63:0]  data_input,data_input28,645
-				   output 		  master_reset,master_reset30,687
-				   output 		  io_updateio_update31,719
-	 STATE_INIT = 0,STATE_INIT41,918
-	 STATE_SEND = 1;STATE_SEND42,936
-	 IO_MODE = `IOMODE_4_BIT;IO_MODE46,978
-   reg [32-1:0] 				  ftw_ch0_buf;ftw_ch0_buf48,1009
-   reg [32-1:0] 				  ftw_ch1_buf;ftw_ch1_buf49,1044
-   reg [32-1:0] 				  asf_ch0_buf;asf_ch0_buf50,1079
-   reg [32-1:0] 				  asf_ch1_buf;asf_ch1_buf51,1114
+ad9958_core.v,2293
+module ad9958_core(ad9958_core9,107
+				   input 			 clock,clock10,127
+				   input 			 reset_n,reset_n11,151
+				   input [32-1:0] 	 ftw_ch0,ftw_ch013,225
+				   input [32-1:0] 	 ftw_ch1,ftw_ch114,258
+				   input [32-1:0] 	 asf_ch0,asf_ch015,291
+				   input [32-1:0] 	 asf_ch1,asf_ch116,324
+				   input 			 vco_gain,vco_gain19,420
+				   input [4:0] 		 clock_multiplier,clock_multiplier20,447
+				   input [1:0] 		 dac_fscale_ch0,dac_fscale_ch022,523
+				   input [1:0] 		 dac_fscale_ch1,dac_fscale_ch123,561
+				   input 			 busy,busy25,600
+				   output reg 		 trigger,trigger27,624
+				   output reg [4:0]  packs_to_send,packs_to_send28,654
+				   output reg [63:0] data_input,data_input29,694
+				   output reg 		 master_reset,master_reset31,732
+				   output reg 		 io_updateio_update32,767
+	 MSB_FIRST = 0,MSB_FIRST37,848
+	 LSB_FIRST = 1;LSB_FIRST38,865
+	 CH0_ENABLE = 8'b01000000,CH0_ENABLE41,896
+	 CH1_ENABLE = 8'b10000000;CH1_ENABLE42,924
+	 IO_MODE = `IOMODE_4_BIT;IO_MODE45,966
+	 STATE_MASTER_RESET = 0,STATE_MASTER_RESET53,1157
+	 STATE_IO_UPDATE = 1,STATE_IO_UPDATE54,1183
+	 STATE_INSTRUCTION_WRITE = 2,STATE_INSTRUCTION_WRITE55,1206
+	 STATE_CSR_CONFIG = 3,STATE_CSR_CONFIG56,1237
+	 STATE_FR1_CONFIG = 4,STATE_FR1_CONFIG57,1261
+	 STATE_FR2_CONFIG = 5,STATE_FR2_CONFIG58,1285
+	 STATE_CFR_CONFIG = 6,STATE_CFR_CONFIG59,1309
+	 STATE_FTW_CONFIG = 7,STATE_FTW_CONFIG60,1333
+	 STATE_ASF_CONFIG = 8,STATE_ASF_CONFIG61,1357
+	 STATE_WAIT = 9;STATE_WAIT62,1381
+	 NONE_SELECTED = 0,NONE_SELECTED65,1416
+	 CH0_SELECTED = 1,CH0_SELECTED66,1437
+	 CH1_SELECTED = 2,CH1_SELECTED67,1457
+	 BOTH_SELECTED = 3;BOTH_SELECTED68,1477
+	 TUNE_FREQ = 0,TUNE_FREQ71,1512
+	 TUNE_AMPL = 1;TUNE_AMPL72,1529
+   reg 								 init_done;init_done74,1550
+   reg [1:0] 						 channel_select;   channel_select75,1577
+   reg [3:0] 						 state;state77,1617
+   reg [3:0] 						 next_state;next_state78,1644
+   reg [7:0] 						 reg_address;reg_address80,1680
+   reg [1:0] 						 tune_target;tune_target82,1714
+   reg [32-1:0] 					 ftw_ch0_buf;ftw_ch0_buf84,1751
+   reg [32-1:0] 					 ftw_ch1_buf;ftw_ch1_buf85,1786
+   reg [32-1:0] 					 asf_ch0_buf;asf_ch0_buf86,1821
+   reg [32-1:0] 					 asf_ch1_buf;asf_ch1_buf87,1856
+
+ad9958_master_tb.v,428
+module ad9958_master_tb;ad9958_master_tb3,22
+   wire cs;cs5,48
+   wire sclk;sclk6,60
+   wire [3:0] sdio;sdio7,74
+   wire 	  master_reset;master_reset8,94
+   wire 	  io_update;io_update9,119
+   reg 		  clock;clock11,142
+   reg 		  reset_n;reset_n12,160
+   reg [32-1:0] ftw_ch0;ftw_ch014,181
+   reg [32-1:0] ftw_ch1;ftw_ch115,206
+   reg [32-1:0] asf_ch0;asf_ch016,231
+   reg [32-1:0] asf_ch1;asf_ch117,256
 
 spi_send_only_tb.v,362
 module spi_send_only_tb;spi_send_only_tb3,22
@@ -77,11 +115,12 @@ module ad9958_master(ad9958_master3,22
    wire					trigger;				// From ad9958_core_inst of ad9958_core.vtrigger28,915
    wire					vco_gain;				// From config_register of ad9958_config_register.vvco_gain29,981
 
-operation.md,151
+operation.md,232
 # OperationOperation1,0
 ## Sending command via SPISending command via SPI2,12
 ## InitializationInitialization8,302
 ## Main LoopMain Loop18,680
+# State machine behaviour descriptionState machine behaviour description27,966
 
 ad9958_config_register.v,306
 module ad9958_config_register(ad9958_config_register11,232
