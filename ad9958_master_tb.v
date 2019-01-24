@@ -13,8 +13,8 @@ module ad9958_master_tb;
 
    reg [32-1:0] ftw_ch0;
    reg [32-1:0] ftw_ch1;
-   reg [32-1:0] asf_ch0;
-   reg [32-1:0] asf_ch1;
+   reg [10-1:0] asf_ch0;
+   reg [10-1:0] asf_ch1;
 
    ad9958_master ad9958_master_inst(/*AUTOINST*/
 									// Outputs
@@ -28,18 +28,18 @@ module ad9958_master_tb;
 									.reset_n			(reset_n),
 									.ftw_ch0			(ftw_ch0[32-1:0]),
 									.ftw_ch1			(ftw_ch1[32-1:0]),
-									.asf_ch0			(asf_ch0[32-1:0]),
-									.asf_ch1			(asf_ch1[32-1:0]));
+									.asf_ch0			(asf_ch0[10-1:0]),
+									.asf_ch1			(asf_ch1[10-1:0]));
 
    always begin
 	  #10 	 clock = ~clock;
    end
 
    always @(posedge clock) begin
-	  ftw_ch0 <= ftw_ch0 + 10;
-	  ftw_ch1 <= ftw_ch1 + 10;
-	  asf_ch0 <= asf_ch0 + 20;
-	  asf_ch1 <= asf_ch1 + 20;
+	  ftw_ch0 <= ftw_ch0 + 32'd500;
+	  ftw_ch1 <= ftw_ch1 + 32'd500;
+	  asf_ch0 <= asf_ch0 + 32'd1000;
+	  asf_ch1 <= asf_ch1 + 32'd1000;
    end
 
    initial begin
@@ -58,7 +58,7 @@ module ad9958_master_tb;
 	  #100 reset_n <= 1;
 
 
-	  #100000
+	  #1000000
 		$display("END");
 	  $finish;	  
 	  

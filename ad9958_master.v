@@ -14,8 +14,8 @@ module ad9958_master(
 
 					 input [32-1:0] ftw_ch0,
 					 input [32-1:0] ftw_ch1,
-					 input [32-1:0] asf_ch0,
-					 input [32-1:0] asf_ch1
+					 input [10-1:0] asf_ch0,
+					 input [10-1:0] asf_ch1
 );
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
@@ -41,8 +41,8 @@ module ad9958_master(
 								.reset_n		(reset_n),
 								.ftw_ch0		(ftw_ch0[32-1:0]),
 								.ftw_ch1		(ftw_ch1[32-1:0]),
-								.asf_ch0		(asf_ch0[32-1:0]),
-								.asf_ch1		(asf_ch1[32-1:0]),
+								.asf_ch0		(asf_ch0[10-1:0]),
+								.asf_ch1		(asf_ch1[10-1:0]),
 								.vco_gain		(vco_gain),
 								.clock_multiplier(clock_multiplier[4:0]),
 								.dac_fscale_ch0	(dac_fscale_ch0[1:0]),
