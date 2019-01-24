@@ -98,6 +98,7 @@ module ad9958_core(
    always @(posedge clock) begin
 	  if(~reset_n) begin
 		 init_done <= 0;
+		 master_reset <= 1;
 		 state <= STATE_MASTER_RESET;
 		 
 	  end else begin
@@ -297,7 +298,7 @@ module ad9958_core(
 			  io_update <= 0;
 			  trigger <= 0;
 			  // wait for spi data transfer to complete
-			  if(~busy) begin
+			  if(~ (busy | trigger)) begin
 				 state <= next_state;
 			  end
 		   end
