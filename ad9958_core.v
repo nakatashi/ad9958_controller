@@ -170,7 +170,8 @@ module ad9958_core(
 			  
 			  case (channel_select)
 				CH0_SELECTED : begin
-				   data_input <= CH0_ENABLE | MSB_FIRST | IO_MODE;
+				   // LSB first.
+				   data_input <= CH0_ENABLE | LSB_FIRST | IO_MODE;
 				   case(tune_target)
 					 TUNE_FREQ : begin
 						reg_address <= `ADDR_CFTW0;
