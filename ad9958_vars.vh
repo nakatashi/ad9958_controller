@@ -1,8 +1,8 @@
 `ifndef _AD9958_VARS_VH_
 
  `define _AD9958_VARS_VH_
- `define INSTRUCTION_WRITE 8'h00;
- `define INSTRUCTION_READ 8'80;
+ `define INSTRUCTION_WRITE 8'h00
+ `define INSTRUCTION_READ 8'80
 
 // bit-shifted
  `define IOMODE_2_WIRE 3'b000
