@@ -106,17 +106,28 @@ module four_bit_spi(
 
 		   STATE_SEND : begin
 			  if(triggered) begin
-				 sdio[0] <= data_input[0];
+				 /*sdio[0] <= data_input[0];
 				 sdio[1] <= data_input[1];
 				 sdio[2] <= data_input[2];
 				 sdio[3] <= data_input[3];
+				  */
+				 sdio[0] <= data_input[(packs_to_send << 2) -4];
+				 sdio[1] <= data_input[(packs_to_send << 2) -3];
+				 sdio[2] <= data_input[(packs_to_send << 2) -2];
+				 sdio[3] <= data_input[(packs_to_send << 2) -1];
 				 packs_cntr <= packs_to_send - 1;
 				 data_send <= (data_input >> 4);
-			  end else begin
+			  end else begin // if (triggered)
+				 /*
 				 sdio[0] <= data_send[0];
 				 sdio[1] <= data_send[1];
 				 sdio[2] <= data_send[2];
 				 sdio[3] <= data_send[3];
+				  */
+				 sdio[0] <= data_input[(packs_cntr << 2) -4];
+				 sdio[1] <= data_input[(packs_cntr << 2) -3];
+				 sdio[2] <= data_input[(packs_cntr << 2) -2];
+				 sdio[3] <= data_input[(packs_cntr << 2) -1];
 				 packs_cntr <= packs_cntr - 1;
 				 data_send <= (data_send >> 4);
 			  end // else: !if(triggered)
