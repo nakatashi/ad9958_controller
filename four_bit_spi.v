@@ -48,7 +48,7 @@ module four_bit_spi(
    reg pos;
    reg neg;
 
-   wire sclk = !(neg^pos);
+   assign sclk = !(neg^pos);
    // Phase of sclk is constant because reset_n is evaluated at the edge of clock.
    always @(posedge clock)begin
 	  if(~reset_n) pos <= 0;
