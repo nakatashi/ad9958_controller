@@ -101,16 +101,16 @@ module ad9958_core(
    always @(posedge clock) begin
 	  if(~reset_n) begin
 		 init_done <= 0;
-		 master_reset <= 1;
+		 master_reset <= 0;
 		 state <= STATE_MASTER_RESET;
 		 
 	  end else begin
 		 case(state)
 		   STATE_MASTER_RESET : begin
-			  master_reset <= 1;
+			  master_reset <= 0;
 			  state <= STATE_INSTRUCTION_WRITE;
 			  next_state <= STATE_CSR_CONFIG;
-			  channel_select <= NONE_SELECTED;
+			  channel_select <= BOTH_SELECTED;
 			  reg_address <= `ADDR_CSR;
 			  tune_target <= TUNE_FREQ;
 
@@ -124,8 +124,8 @@ module ad9958_core(
 			  if(init_done) begin
 				 reg_address <= `ADDR_CSR;
 				 channel_select <= CH0_SELECTED;
-			  end else begin
-				 reg_address <= `ADDR_CFR;
+			  end else begin				 
+			  	 reg_address <= `ADDR_CFR;
 			  end
 		   end // case: STATE_IO_UPDATE
 
@@ -195,6 +195,11 @@ module ad9958_core(
 						reg_address <= `ADDR_ACR;
 					 end
 				   endcase
+				end
+
+				BOTH_SELECTED : begin
+					data_input <= CH0_ENABLE | CH1_ENABLE | MSB_FIRST | IO_MODE;
+				   reg_address <= `ADDR_FR1;
 				end
 				
 				default : begin /*NONE_SELECTED*/
