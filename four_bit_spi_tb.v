@@ -9,21 +9,25 @@ module four_bit_spi_tb;
    reg 		 clock;
    reg 		 reset_n;
    reg 		 trigger;
-   reg [4:0] packs_to_send;
+   reg [5:0] bits_to_send;
    reg [63:0] data_input;
+
+   reg 		  four_bit;
+   
    
    four_bit_spi dut(/*AUTOINST*/
-					 // Outputs
-					 .busy				(busy),
-					 .cs				(cs),
-					 .sclk				(sclk),
-					 .sdio				(sdio[3:0]),
-					 // Inputs
-					 .clock				(clock),
-					 .reset_n			(reset_n),
-					 .trigger			(trigger),
-					 .packs_to_send		(packs_to_send[4:0]),
-					 .data_input		(data_input[63:0]));
+					// Outputs
+					.busy				(busy),
+					.cs					(cs),
+					.sclk				(sclk),
+					.sdio				(sdio[3:0]),
+					// Inputs
+					.clock				(clock),
+					.reset_n			(reset_n),
+					.trigger			(trigger),
+					.four_bit			(four_bit),
+					.bits_to_send		(bits_to_send[5:0]),
+					.data_input			(data_input[63:0]));
    // clock generation   
    always begin
 	  #10 	 clock = ~clock;
@@ -45,15 +49,18 @@ module four_bit_spi_tb;
 	  $display("START");
 	  clock <= 0;
 	  reset_n <= 0;
+	  four_bit <= 0;
 	  #100 reset_n <= 1;
-	  #10 packs_to_send <= 10;
+
+	  #10 bits_to_send <= 40;
 
 	  #10 trigger <= 1;
 
 	  #20 trigger <= 0;
 
 	  # 1000 trigger <= 1;
-	  packs_to_send <= 10;
+	  bits_to_send <= 40;
+	  four_bit <= 1;
 	  # 20 trigger <= 0;
 	  
 	  #10000

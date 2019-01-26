@@ -1,5 +1,5 @@
 
-ad9958_core.v,2338
+ad9958_core.v,2431
 module ad9958_core(ad9958_core9,107
 				   input 			 clock,clock10,127
 				   input 			 reset_n,reset_n11,151
@@ -13,42 +13,44 @@ module ad9958_core(ad9958_core9,107
 				   input [1:0] 		 dac_fscale_ch1,dac_fscale_ch123,561
 				   input 			 busy,busy25,600
 				   output reg 		 trigger,trigger27,624
-				   output reg [4:0]  packs_to_send,packs_to_send28,654
-				   output reg [63:0] data_input,data_input29,694
-				   output reg 		 master_reset,master_reset31,732
-				   output reg 		 io_updateio_update32,767
-	 MSB_FIRST = 0,MSB_FIRST37,848
-	 LSB_FIRST = 1;LSB_FIRST38,865
-	 ASF_EN = 13'b1000000000000;ASF_EN41,896
-	 CH0_ENABLE = 8'b01000000,CH0_ENABLE44,940
-	 CH1_ENABLE = 8'b10000000;CH1_ENABLE45,968
-	 IO_MODE = `IOMODE_4_BIT;IO_MODE48,1010
-	 STATE_MASTER_RESET = 0,STATE_MASTER_RESET56,1201
-	 STATE_IO_UPDATE = 1,STATE_IO_UPDATE57,1227
-	 STATE_INSTRUCTION_WRITE = 2,STATE_INSTRUCTION_WRITE58,1250
-	 STATE_CSR_CONFIG = 3,STATE_CSR_CONFIG59,1281
-	 STATE_FR1_CONFIG = 4,STATE_FR1_CONFIG60,1305
-	 STATE_FR2_CONFIG = 5,STATE_FR2_CONFIG61,1329
-	 STATE_CFR_CONFIG = 6,STATE_CFR_CONFIG62,1353
-	 STATE_FTW_CONFIG = 7,STATE_FTW_CONFIG63,1377
-	 STATE_ASF_CONFIG = 8,STATE_ASF_CONFIG64,1401
-	 STATE_WAIT = 9;STATE_WAIT65,1425
-	 NONE_SELECTED = 0,NONE_SELECTED68,1460
-	 CH0_SELECTED = 1,CH0_SELECTED69,1481
-	 CH1_SELECTED = 2,CH1_SELECTED70,1501
-	 BOTH_SELECTED = 3;BOTH_SELECTED71,1521
-	 TUNE_FREQ = 0,TUNE_FREQ74,1556
-	 TUNE_AMPL = 1;TUNE_AMPL75,1573
-   reg 								 init_done;init_done77,1594
-   reg [1:0] 						 channel_select;   channel_select78,1621
-   reg [3:0] 						 state;state80,1661
-   reg [3:0] 						 next_state;next_state81,1688
-   reg [7:0] 						 reg_address;reg_address83,1724
-   reg [1:0] 						 tune_target;tune_target85,1758
-   reg [32-1:0] 					 ftw_ch0_buf;ftw_ch0_buf87,1795
-   reg [32-1:0] 					 ftw_ch1_buf;ftw_ch1_buf88,1830
-   reg [32-1:0] 					 asf_ch0_buf;asf_ch0_buf89,1865
-   reg [32-1:0] 					 asf_ch1_buf;asf_ch1_buf90,1900
+				   output reg 		 four_bit,four_bit28,654
+				   output reg [4:0]  packs_to_send,packs_to_send29,685
+				   output reg [63:0] data_input,data_input30,725
+				   output reg 		 master_reset,master_reset32,763
+				   output reg 		 io_updateio_update33,798
+	 MSB_FIRST = 0,MSB_FIRST38,879
+	 LSB_FIRST = 1;LSB_FIRST39,896
+	 ASF_EN = 13'b1000000000000;ASF_EN42,927
+	 CH0_ENABLE = 8'b01000000,CH0_ENABLE45,971
+	 CH1_ENABLE = 8'b10000000;CH1_ENABLE46,999
+	 IO_MODE = `IOMODE_4_BIT;IO_MODE49,1041
+	 STATE_MASTER_RESET = 0,STATE_MASTER_RESET57,1232
+	 STATE_IO_UPDATE = 1,STATE_IO_UPDATE58,1258
+	 STATE_INSTRUCTION_WRITE = 2,STATE_INSTRUCTION_WRITE59,1281
+	 STATE_CSR_CONFIG = 3,STATE_CSR_CONFIG60,1312
+	 STATE_FR1_CONFIG = 4,STATE_FR1_CONFIG61,1336
+	 STATE_FR2_CONFIG = 5,STATE_FR2_CONFIG62,1360
+	 STATE_CFR_CONFIG = 6,STATE_CFR_CONFIG63,1384
+	 STATE_FTW_CONFIG = 7,STATE_FTW_CONFIG64,1408
+	 STATE_ASF_CONFIG = 8,STATE_ASF_CONFIG65,1432
+	 STATE_WAIT = 9;STATE_WAIT66,1456
+	 NONE_SELECTED = 0,NONE_SELECTED69,1491
+	 CH0_SELECTED = 1,CH0_SELECTED70,1512
+	 CH1_SELECTED = 2,CH1_SELECTED71,1532
+	 BOTH_SELECTED = 3;BOTH_SELECTED72,1552
+	 TUNE_FREQ = 0,TUNE_FREQ75,1587
+	 TUNE_AMPL = 1;TUNE_AMPL76,1604
+   reg 								 init_done;init_done78,1625
+   reg [1:0] 						 channel_select;channel_select79,1652
+   reg 								 io_mode_set;io_mode_set80,1688
+   reg [3:0] 						 state;state82,1718
+   reg [3:0] 						 next_state;next_state83,1745
+   reg [7:0] 						 reg_address;reg_address85,1781
+   reg [1:0] 						 tune_target;tune_target87,1815
+   reg [32-1:0] 					 ftw_ch0_buf;ftw_ch0_buf89,1852
+   reg [32-1:0] 					 ftw_ch1_buf;ftw_ch1_buf90,1887
+   reg [32-1:0] 					 asf_ch0_buf;asf_ch0_buf91,1922
+   reg [32-1:0] 					 asf_ch1_buf;asf_ch1_buf92,1957
 
 ad9958_master_tb.v,428
 module ad9958_master_tb;ad9958_master_tb3,22
@@ -135,23 +137,23 @@ module four_bit_spi(four_bit_spi2,21
 					 input 			  clock,clock3,42
 					 input 			  reset_n,reset_n4,66
 					 input 			  trigger,trigger5,92
-					 output reg 	  busy,busy6,118
-					 input [4:0] 	  packs_to_send,packs_to_send7,144
-					 input [63:0] 	  data_input,data_input9,190
-					 output reg 	  cs,cs11,247
-					 output  	  sclk,sclk12,271
-					 output reg [3:0] sdiosdio13,294
-	 STATE_IDLE = 0,STATE_IDLE18,377
-	 STATE_SEND = 1;STATE_SEND19,395
-   reg [1:0] 						  state;state21,414
-   reg [4:0] 						  packs_cntr;packs_cntr22,442
-   reg [63:0] 						  data_send;data_send23,475
-   reg 								  triggered;triggered25,509
-   reg pos;pos48,943
-   reg neg;neg49,955
-   wire sclk = !(neg^pos);sclk51,968
+					 input 			  four_bit,four_bit6,118
+					 output reg 	  busy,busy7,145
+					 input [5:0] 	  bits_to_send,bits_to_send8,171
+					 input [63:0] 	  data_input,data_input10,216
+					 output reg 	  cs,cs12,273
+					 output 		  sclk,sclk13,297
+					 output reg [3:0] sdiosdio14,320
+	 STATE_IDLE = 0,STATE_IDLE19,403
+	 STATE_SEND = 1;STATE_SEND20,421
+   reg [1:0] 						  state;state22,440
+   reg [5:0] 						  bits_cntr;bits_cntr23,468
+   reg [63:0] 						  data_send;data_send24,500
+   reg 								  triggered;triggered26,534
+   reg pos;pos32,599
+   reg neg;neg33,611
 
-four_bit_spi_tb.v,360
+four_bit_spi_tb.v,395
 module four_bit_spi_tb;four_bit_spi_tb3,22
    wire busy;busy4,46
    wire cs;cs5,60
@@ -160,6 +162,7 @@ module four_bit_spi_tb;four_bit_spi_tb3,22
    reg 		 clock;clock9,107
    reg 		 reset_n;reset_n10,124
    reg 		 trigger;trigger11,143
-   reg [4:0] packs_to_send;packs_to_send12,162
-   reg [63:0] data_input;data_input13,190
-   integer 	   i;i31,618
+   reg [5:0] bits_to_send;bits_to_send12,162
+   reg [63:0] data_input;data_input13,189
+   reg 		  four_bit;four_bit15,216
+   integer 	   i;i35,661

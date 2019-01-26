@@ -19,12 +19,13 @@ module ad9958_master(
 );
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
-   wire					busy;					// From spi_master of spi_send_only.v
+   wire [5:0]			bits_to_send;			// From ad9958_core_inst of ad9958_core.v
+   wire					busy;					// From spi_master of four_bit_spi.v
    wire [4:0]			clock_multiplier;		// From config_register of ad9958_config_register.v
    wire [1:0]			dac_fscale_ch0;			// From config_register of ad9958_config_register.v
    wire [1:0]			dac_fscale_ch1;			// From config_register of ad9958_config_register.v
    wire [63:0]			data_input;				// From ad9958_core_inst of ad9958_core.v
-   wire [4:0]			packs_to_send;			// From ad9958_core_inst of ad9958_core.v
+   wire					four_bit;				// From ad9958_core_inst of ad9958_core.v
    wire					trigger;				// From ad9958_core_inst of ad9958_core.v
    wire					vco_gain;				// From config_register of ad9958_config_register.v
    // End of automatics
@@ -32,7 +33,8 @@ module ad9958_master(
    ad9958_core ad9958_core_inst(/*AUTOINST*/
 								// Outputs
 								.trigger		(trigger),
-								.packs_to_send	(packs_to_send[4:0]),
+								.four_bit		(four_bit),
+								.bits_to_send	(bits_to_send[5:0]),
 								.data_input		(data_input[63:0]),
 								.master_reset	(master_reset),
 								.io_update		(io_update),
@@ -51,17 +53,18 @@ module ad9958_master(
    
 
    four_bit_spi spi_master(/*AUTOINST*/
-							// Outputs
-							.busy				(busy),
-							.cs					(cs),
-							.sclk				(sclk),
-							.sdio				(sdio[3:0]),
-							// Inputs
-							.clock				(clock),
-							.reset_n			(reset_n),
-							.trigger			(trigger),
-							.packs_to_send		(packs_to_send[4:0]),
-							.data_input			(data_input[63:0]));
+						   // Outputs
+						   .busy				(busy),
+						   .cs					(cs),
+						   .sclk				(sclk),
+						   .sdio				(sdio[3:0]),
+						   // Inputs
+						   .clock				(clock),
+						   .reset_n				(reset_n),
+						   .trigger				(trigger),
+						   .four_bit			(four_bit),
+						   .bits_to_send		(bits_to_send[5:0]),
+						   .data_input			(data_input[63:0]));
 
    ad9958_config_register config_register(/*AUTOINST*/
 										  // Outputs

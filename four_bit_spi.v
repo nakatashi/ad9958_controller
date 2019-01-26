@@ -3,13 +3,14 @@ module four_bit_spi(
 					 input 			  clock,
 					 input 			  reset_n,
 					 input 			  trigger,
+					 input 			  four_bit,
 					 output reg 	  busy,
-					 input [4:0] 	  packs_to_send,
+					 input [5:0] 	  bits_to_send,
 					 // 
 					 input [63:0] 	  data_input,
 					 // SPI interface
 					 output reg 	  cs,
-					 output  	  sclk,
+					 output 		  sclk,
 					 output reg [3:0] sdio
 );
 
@@ -19,7 +20,7 @@ module four_bit_spi(
 	 STATE_SEND = 1;
 
    reg [1:0] 						  state;
-   reg [4:0] 						  packs_cntr;
+   reg [5:0] 						  bits_cntr;
    reg [63:0] 						  data_send;
 
    reg 								  triggered;
@@ -27,23 +28,6 @@ module four_bit_spi(
    initial begin
 	  cs = 0;
    end
-
-/*   always @(posedge clock or negedge clock) begin
-	  if(~reset_n) begin
-		 sclk <= 1'b1;
-	  end else begin
-		 case(state)
-		   STATE_IDLE : begin
-			  sclk <= 1'b1; //clock stall high
-			  busy <= 0;
-		   end
-		   STATE_SEND : begin
-			  sclk <= ~sclk;
-			  busy <= 1;
-		   end
-		 endcase // case (state)
-	  end
-   end // always @ (posedge clock or negedge clock)*/
 
    reg pos;
    reg neg;
@@ -88,11 +72,11 @@ module four_bit_spi(
 		STATE_SEND : begin
 		   busy <= 1;
 		   triggered <= 0;
-		   if(packs_cntr == 0) begin
+		   if(bits_cntr == 0) begin
 			  state <= STATE_IDLE;
 		   end
 		end
-	  endcase
+	  endcase // case (state)
    end // always @ (posedge clock)
 
    always @(negedge sclk) begin
@@ -105,35 +89,55 @@ module four_bit_spi(
 		   end
 
 		   STATE_SEND : begin
-			  if(triggered) begin
-				 /*sdio[0] <= data_input[0];
-				 sdio[1] <= data_input[1];
-				 sdio[2] <= data_input[2];
-				 sdio[3] <= data_input[3];
-				  */
-				 sdio[0] <= data_input[(packs_to_send << 2) -4];
-				 sdio[1] <= data_input[(packs_to_send << 2) -3];
-				 sdio[2] <= data_input[(packs_to_send << 2) -2];
-				 sdio[3] <= data_input[(packs_to_send << 2) -1];
-				 packs_cntr <= packs_to_send - 1;
-				 data_send <= (data_input >> 4);
-			  end else begin // if (triggered)
-				 /*
-				 sdio[0] <= data_send[0];
-				 sdio[1] <= data_send[1];
-				 sdio[2] <= data_send[2];
-				 sdio[3] <= data_send[3];
-				  */
-				 sdio[0] <= data_input[(packs_cntr << 2) -4];
-				 sdio[1] <= data_input[(packs_cntr << 2) -3];
-				 sdio[2] <= data_input[(packs_cntr << 2) -2];
-				 sdio[3] <= data_input[(packs_cntr << 2) -1];
-				 packs_cntr <= packs_cntr - 1;
-				 data_send <= (data_send >> 4);
-			  end // else: !if(triggered)
-		   end
+			  if(four_bit) begin
+				 if(triggered) begin
+					/*sdio[0] <= data_input[0];
+					 sdio[1] <= data_input[1];
+					 sdio[2] <= data_input[2];
+					 sdio[3] <= data_input[3];
+					 */
+					sdio[0] <= data_input[bits_to_send-4];
+					sdio[1] <= data_input[bits_to_send-3];
+					sdio[2] <= data_input[bits_to_send-2];
+					sdio[3] <= data_input[bits_to_send-1];
+					bits_cntr <= bits_to_send - 4;
+					data_send <= (data_input >> 4);
+				 end else begin // if (triggered)
+					/*
+					 sdio[0] <= data_send[0];
+					 sdio[1] <= data_send[1];
+					 sdio[2] <= data_send[2];
+					 sdio[3] <= data_send[3];
+					 */
+					sdio[0] <= data_input[bits_cntr-4];
+					sdio[1] <= data_input[bits_cntr-3];
+					sdio[2] <= data_input[bits_cntr-2];
+					sdio[3] <= data_input[bits_cntr-1];
+					bits_cntr <= bits_cntr - 4;
+					data_send <= (data_send >> 4);
+				 end // else: !if(triggered)
+			  end else begin // if (four_bit)
+				 if(triggered) begin
+					sdio[0] <= data_input[bits_to_send -1];
+					sdio[1] <= 0;
+					sdio[2] <= 0;
+					sdio[3] <= 0;
+				   
+					bits_cntr <= bits_to_send - 1;
+					data_send <= (data_input >> 1);
+				 end else begin
+					sdio[0] <= data_input[bits_cntr -1];
+					sdio[1] <= 0;
+					sdio[2] <= 0;
+					sdio[3] <= 0;
+					
+					bits_cntr <= bits_cntr - 1;
+					data_send <= (data_send >> 1);
+				 end
+			  end // else: !if(four_bit)
+		   end // case: STATE_SEND
 		 endcase // case (state)
-	  end
+	  end // else: !if(~reset_n)
 	  
    end // always @ (negedge sclk)
-endmodule
+endmodule // four_bit_spi

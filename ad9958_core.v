@@ -25,7 +25,8 @@ module ad9958_core(
 				   input 			 busy,
 
 				   output reg 		 trigger,
-				   output reg [4:0]  packs_to_send,
+				   output reg 		 four_bit,
+				   output reg [5:0]  bits_to_send,
 				   output reg [63:0] data_input,
 
 				   output reg 		 master_reset,
@@ -75,7 +76,8 @@ module ad9958_core(
 	 TUNE_AMPL = 1;
    
    reg 								 init_done;
-   reg [1:0] 						 channel_select;   
+   reg [1:0] 						 channel_select;
+   reg 								 io_mode_set;
 
    reg [3:0] 						 state;
    reg [3:0] 						 next_state;
@@ -103,10 +105,11 @@ module ad9958_core(
 		 init_done <= 0;
 		 master_reset <= 0;
 		 state <= STATE_MASTER_RESET;
-		 
+		 io_mode_set <= 0;
 	  end else begin
 		 case(state)
 		   STATE_MASTER_RESET : begin
+			  four_bit <= 0;
 			  master_reset <= 0;
 			  state <= STATE_INSTRUCTION_WRITE;
 			  next_state <= STATE_CSR_CONFIG;
@@ -135,7 +138,13 @@ module ad9958_core(
 
 			  trigger <= 1;
 			  data_input <= reg_address | `INSTRUCTION_WRITE;
-			  packs_to_send <= `SIZE_INST;
+			  bits_to_send <= `SIZE_INST;
+
+			  if(io_mode_set) begin
+				 four_bit <= 1;
+			  end else begin
+				 four_bit <= 0;
+			  end
 			  
 			  case(reg_address)
 				`ADDR_CSR : begin
@@ -169,7 +178,7 @@ module ad9958_core(
 
 			  trigger <= 1;
 
-			  packs_to_send <= `SIZE_CSR;
+			  bits_to_send <= `SIZE_CSR;
 			  
 			  case (channel_select)
 				CH0_SELECTED : begin
@@ -198,6 +207,7 @@ module ad9958_core(
 				end
 
 				BOTH_SELECTED : begin
+				   io_mode_set <= 1;
 					data_input <= CH0_ENABLE | CH1_ENABLE | MSB_FIRST | IO_MODE;
 				   reg_address <= `ADDR_FR1;
 				end
@@ -215,7 +225,7 @@ module ad9958_core(
 			  reg_address <= `ADDR_CSR;
 
 			  trigger <= 1;
-			  packs_to_send <= `SIZE_FR1;
+			  bits_to_send <= `SIZE_FR1;
 			  data_input <= (vco_gain << 23) | (clock_multiplier << 18);
 			  
 		   end
@@ -234,7 +244,7 @@ module ad9958_core(
 
 			  trigger <= 1;
 
-			  packs_to_send <= `SIZE_CFR;
+			  bits_to_send <= `SIZE_CFR;
 			  data_input <= (dac_fscale_ch0 << 8);
 			  
 			  reg_address <= `ADDR_CSR;
@@ -245,7 +255,7 @@ module ad9958_core(
 			  next_state <= STATE_INSTRUCTION_WRITE;
 
 			  trigger <= 1;
-			  packs_to_send <= `SIZE_CFTW0;
+			  bits_to_send <= `SIZE_CFTW0;
 			  
 			  case(channel_select)
 				CH0_SELECTED : begin
@@ -275,7 +285,7 @@ module ad9958_core(
 			  state <= STATE_WAIT;
 
 			  trigger <= 1;
-			  packs_to_send <= `SIZE_ACR;
+			  bits_to_send <= `SIZE_ACR;
 			  
 			  case (channel_select)
 				CH0_SELECTED : begin
