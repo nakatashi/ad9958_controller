@@ -123,13 +123,14 @@ module ad9958_core(
 			  io_update <= 1;
 			  state <= STATE_WAIT;
 			  next_state <= STATE_INSTRUCTION_WRITE;
+			  channel_select <= CH0_SELECTED;
 			  
-			  if(init_done) begin
+			  /*if(init_done) begin
 				 reg_address <= `ADDR_CSR;
 				 channel_select <= CH0_SELECTED;
 			  end else begin				 
 			  	 reg_address <= `ADDR_CFR;
-			  end
+			  end*/
 		   end // case: STATE_IO_UPDATE
 
 		   STATE_INSTRUCTION_WRITE : begin
@@ -174,8 +175,6 @@ module ad9958_core(
 
 		   STATE_CSR_CONFIG : begin
 			  state <= STATE_WAIT;
-			  next_state <= STATE_INSTRUCTION_WRITE;
-
 			  trigger <= 1;
 
 			  bits_to_send <= `SIZE_CSR;
@@ -183,6 +182,7 @@ module ad9958_core(
 			  case (channel_select)
 				CH0_SELECTED : begin
 				   // LSB first.
+					next_state <= STATE_INSTRUCTION_WRITE;
 				   data_input <= CH0_ENABLE | MSB_FIRST | IO_MODE;
 				   case(tune_target)
 					 TUNE_FREQ : begin
@@ -195,6 +195,7 @@ module ad9958_core(
 				end
 
 				CH1_SELECTED : begin
+					next_state <= STATE_INSTRUCTION_WRITE;
 				   data_input <= CH1_ENABLE | MSB_FIRST | IO_MODE;
 				   case(tune_target)
 					 TUNE_FREQ : begin
@@ -207,6 +208,8 @@ module ad9958_core(
 				end
 
 				BOTH_SELECTED : begin
+				// in initialization sequence.
+					next_state <= STATE_IO_UPDATE;
 				   io_mode_set <= 1;
 					data_input <= CH0_ENABLE | CH1_ENABLE | MSB_FIRST | IO_MODE;
 				   reg_address <= `ADDR_FR1;
@@ -222,7 +225,7 @@ module ad9958_core(
 		   STATE_FR1_CONFIG : begin
 			  state <= STATE_WAIT;
 			  next_state <= STATE_IO_UPDATE;
-			  reg_address <= `ADDR_CSR;
+			  reg_address <= `ADDR_CFR;
 
 			  trigger <= 1;
 			  bits_to_send <= `SIZE_FR1;
